@@ -1,10 +1,16 @@
 """Wires the official GitHub MCP server (downloaded binary, run via
 stdio -- see scripts/setup_github_mcp.sh) into ADK as a toolset.
 
-Only the `issues`, `pull_requests`, and `repos` toolsets are enabled --
-least-privilege: the PRAgent only ever needs to read an issue, push a
-branch, and open a PR against the single sandbox repo the fine-grained
-PAT is scoped to.
+Only the `issues`, `pull_requests`, and `repos` toolsets are enabled.
+
+Two separate tokens are supported, on purpose:
+- GITHUB_PERSONAL_ACCESS_TOKEN: fine-grained, scoped to the single sandbox
+  repo the benchmark demo mode (agent/cli.py `resolve`) owns and writes to.
+- GITHUB_PAT_BROAD: fine-grained but scoped to "All repositories", needed
+  by the real-issue dry-run mode (`try-real-issue`) since `fork_repository`
+  has to work against repos the user doesn't own yet (the fork doesn't
+  exist until created, so a repo-specific token can't cover it). Kept
+  separate so the sandbox demo's least-privilege token is never widened.
 """
 
 from __future__ import annotations
@@ -20,11 +26,11 @@ REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 GITHUB_MCP_BINARY = REPO_ROOT / "scripts" / "bin" / "github-mcp-server"
 
 
-def build_github_toolset() -> MCPToolset:
-    token = os.environ.get("GITHUB_PERSONAL_ACCESS_TOKEN")
+def build_github_toolset(token_env_var: str = "GITHUB_PERSONAL_ACCESS_TOKEN") -> MCPToolset:
+    token = os.environ.get(token_env_var)
     if not token:
         raise RuntimeError(
-            "GITHUB_PERSONAL_ACCESS_TOKEN is not set -- required to start the "
+            f"{token_env_var} is not set -- required to start the "
             "GitHub MCP server. See .env.example."
         )
     if not GITHUB_MCP_BINARY.exists():

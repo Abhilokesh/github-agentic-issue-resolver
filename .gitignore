@@ -8,3 +8,5 @@ sandbox_repo_work/
 scripts/bin/
 .venv/
 *.egg-info/
+real_issue_attempts/
+.agent_venv/
