@@ -1,0 +1,128 @@
+# Curated benchmark issue set. Each issue's `description` is what gets
+# fed to the agent as "the GitHub issue" -- everything else here
+# (category, oracle_cmd) is benchmark-harness metadata the agent never
+# sees directly. oracle_cmd is a shell command run from the repo root;
+# exit code 0 means the issue is resolved.
+
+issues:
+  - id: A1
+    title: "to_snake_case doesn't match its own documented example"
+    category: documentation
+    description: |
+      I ran the example from the docstring of `to_snake_case` and it
+      doesn't match what's documented:
+
+          >>> to_snake_case("HelloWorld")
+
+      The docstring says this should return 'hello_world', but that's
+      not what I'm getting. Please make the function and its documented
+      example consistent, so the doctest passes.
+    oracle_cmd: "pytest --doctest-modules stringkit/casing.py -q"
+    target_hint: stringkit/casing.py
+    context_files: [stringkit/casing.py]
+
+  - id: A2
+    title: "truncate() docstring example looks wrong"
+    category: documentation
+    description: |
+      The docstring example for `truncate()` doesn't look right:
+
+          >>> truncate("Hello there", length=4, suffix="")
+
+      Can you check whether the function or the documented example
+      output is correct, and fix whichever one is wrong so the doctest
+      passes?
+    oracle_cmd: "pytest --doctest-modules stringkit/text.py -q"
+    target_hint: stringkit/text.py
+    context_files: [stringkit/text.py]
+
+  - id: B1
+    title: "Unused import in validators.py"
+    category: lint
+    description: |
+      `ruff check stringkit/validators.py` reports an unused import.
+      Please clean it up.
+    oracle_cmd: "ruff check --select F401 stringkit/validators.py"
+    target_hint: stringkit/validators.py
+    context_files: [stringkit/validators.py]
+
+  - id: B2
+    title: "pluralize() uses a mutable default argument"
+    category: lint
+    description: |
+      `ruff` flags `pluralize()`'s `exceptions=[]` default argument as a
+      mutable-default-argument antipattern. Please fix this without
+      changing the function's existing behavior.
+    oracle_cmd: "ruff check --select B stringkit/formatting.py"
+    target_hint: stringkit/formatting.py
+    context_files: [stringkit/formatting.py]
+
+  - id: C1
+    title: "word_count() has no type hints"
+    category: type-hints
+    description: |
+      Every other public function in stringkit has full type
+      annotations except `word_count()`. Please add appropriate
+      parameter and return type annotations.
+    oracle_cmd: "pytest tests/test_type_hints.py::test_word_count_has_type_hints -q"
+    target_hint: stringkit/text.py
+    context_files: [stringkit/text.py]
+
+  - id: C2
+    title: "is_valid_url() is missing type annotations"
+    category: type-hints
+    description: |
+      `is_valid_url()` takes a string and returns a bool but has no type
+      annotations at all. Please add the missing type hints.
+    oracle_cmd: "pytest tests/test_type_hints.py::test_is_valid_url_has_type_hints -q"
+    target_hint: stringkit/validators.py
+    context_files: [stringkit/validators.py]
+
+  - id: D1
+    title: "DeprecationWarning from generated_at_label() on Python 3.12+"
+    category: outdated-api
+    description: |
+      Running the test suite on Python 3.12 raises a DeprecationWarning
+      pointing at `generated_at_label()`. Please update it to use a
+      non-deprecated datetime API while keeping the same output format.
+    oracle_cmd: "pytest tests/test_formatting.py::test_generated_at_label_no_deprecation_warning -q"
+    target_hint: stringkit/formatting.py
+    context_files: [stringkit/formatting.py]
+
+  - id: D2
+    title: "formatting.py uses typing.List instead of the builtin generic"
+    category: outdated-api
+    description: |
+      `ruff` flags `formatting.py` for using `typing.List` instead of
+      the modern builtin `list[...]` generic syntax. Please modernize
+      it.
+    oracle_cmd: "ruff check --select UP stringkit/formatting.py"
+    target_hint: stringkit/formatting.py
+    context_files: [stringkit/formatting.py]
+
+  - id: E1
+    title: "human_readable_size and pluralize are missing tests"
+    category: missing-tests
+    description: |
+      `human_readable_size`'s larger-unit branches (MB and up) and
+      `pluralize()` have no test coverage at all. A Gherkin spec for the
+      required scenarios already exists at
+      `features/formatting.feature` -- please implement pytest-bdd step
+      definitions in `tests/step_defs/test_formatting_bdd.py` that
+      satisfy it.
+    oracle_cmd: "pytest tests/step_defs/test_formatting_bdd.py -q"
+    target_hint: features/formatting.feature
+    context_files: [features/formatting.feature, stringkit/formatting.py]
+
+  - id: E2
+    title: "is_valid_url has no tests"
+    category: missing-tests
+    description: |
+      `is_valid_url()` has no test coverage. A Gherkin spec for the
+      required scenarios already exists at
+      `features/url_validation.feature` -- please implement pytest-bdd
+      step definitions in `tests/step_defs/test_url_validation_bdd.py`
+      that satisfy it.
+    oracle_cmd: "pytest tests/step_defs/test_url_validation_bdd.py -q"
+    target_hint: features/url_validation.feature
+    context_files: [features/url_validation.feature, stringkit/validators.py]

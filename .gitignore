@@ -1,0 +1,10 @@
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+benchmark/results/*.json
+# comparison_chart.png is a real artifact worth keeping visible in the repo
+sandbox_repo_work/
+scripts/bin/
+.venv/
+*.egg-info/
